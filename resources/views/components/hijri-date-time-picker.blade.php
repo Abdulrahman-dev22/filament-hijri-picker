@@ -180,7 +180,7 @@
                             >
                                 <div
                                     x-text="day"
-                                    x-on:click="dayIsDisabled(day) || selectDate(day)"
+                                    x-on:click=" dayIsDisabled(day) || selectDate(day)"
                                     x-on:mouseenter="setFocusedDay(day)"
                                     role="option"
                                     x-bind:aria-selected="focusedDate.date() === day"
