@@ -188,19 +188,26 @@ export default function hijriDateTimePickerFormComponent({
                 }
             }
 
-            const maxGregorian = this.getMaxDate();
-            // console.log('the maxGerogian: ', maxGregorian);
-            const max = maxGregorian ? moment(maxGregorian).toHijri() : null;
+            // Get Gregorian moments from refs (these are ISO strings from backend)
+            const maxGregorian = this.getMaxDate(); // returns moment or null
+            const minGregorian = this.getMinDate(); // returns moment or null
 
-            const minGregorian = this.getMinDate();
-            const min = minGregorian ? moment(minGregorian).toHijri() : null;
 
-            // console.log('Max Hijri:', max ? max.format(this.displayFormat) : null);
+            const max = maxGregorian ? moment(maxGregorian) : null;
+            const min = minGregorian ? moment(minGregorian) : null;
 
-            if (max && date.isAfter(max, 'iDay')) return true;
-            if (min && date.isBefore(min, 'iDay')) return true;
+            const maxHijri = max ? max.iYear(max.iYear()).iMonth(max.iMonth()).iDate(max.iDate()) : null;
+            const minHijri = min ? min.iYear(min.iYear()).iMonth(min.iMonth()).iDate(min.iDate()) : null;
+            console.log('Max Gregorian:', max ? max.format('YYYY-MM-DD') : null);
+            console.log('Min Gregorian:', min ? min.format('YYYY-MM-DD') : null);
+            console.log('Max Hijri:', max ? max.format('iYYYY/iM/iD') : null);
+            console.log('Min Hijri:', min ? min.format('iYYYY/iM/iD') : null);
+
+            if (max && date.isAfter(maxHijri, 'day')) return true;   // use 'day' for Gregorian comparison
+            if (min && date.isBefore(minHijri, 'day')) return true;
 
             return false;
+
         },
 
 
@@ -241,22 +248,20 @@ export default function hijriDateTimePickerFormComponent({
         },
 
         getMaxDate: function () {
-            if (
-                this.$refs.maxDate?.value == null ||
-                this.$refs.maxDate?.value == ""
-            )
-                return null;
-            let date = moment(this.$refs.maxDate?.value, 'iYYYY/iM/iD');
+            if (!this.$refs.maxDate?.value) return null;
+
+            // Parse as Gregorian moment (default)
+            let date = moment(this.$refs.maxDate.value);
+
             return date.isValid() ? date : null;
         },
 
         getMinDate: function () {
-            if (
-                this.$refs.minDate?.value == null ||
-                this.$refs.minDate?.value == ""
-            )
-                return null;
-            let date = moment(this.$refs.minDate?.value, 'iYYYY/iM/iD');
+            if (!this.$refs.maxDate?.value) return null;
+
+            // Parse as Gregorian moment (default)
+            let date = moment(this.$refs.minDate.value);
+
             return date.isValid() ? date : null;
         },
 
