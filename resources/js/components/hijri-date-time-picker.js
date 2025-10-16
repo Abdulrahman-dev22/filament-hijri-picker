@@ -1,12 +1,6 @@
-
 import moment from "moment-hijri";
 import "moment-timezone";
-// import "moment/locale/ar-sa";
 
-
-// moment.tz.setDefault("Asia/Riyadh");
-
-// window.moment = moment;
 
 export default function hijriDateTimePickerFormComponent({
  displayFormat,
@@ -15,6 +9,7 @@ export default function hijriDateTimePickerFormComponent({
  locale,
  shouldCloseOnDateSelection,
  state,
+ hasTime,
 }) {
     const timezone = "Asia/Riyadh";
     const max_allowed_year = 2077;
@@ -22,7 +17,7 @@ export default function hijriDateTimePickerFormComponent({
 
     return {
         daysInFocusedMonth: [],
-        displayFormat: "iYYYY/iM/iD",
+        displayFormat: hasTime? 'iYYYY/iM/iD HH:mm:ss': 'iYYYY/iM/iD',
         displayText: '',
         emptyDaysInFocusedMonth: [],
         focusedDate: null,
@@ -37,7 +32,7 @@ export default function hijriDateTimePickerFormComponent({
         months: [],
 
         init: function () {
-            moment().locale('ar-sa');
+            moment().locale(locale);
 
             this.focusedDate = this.getSelectedDate() ?? moment().startOf("iDate");
             let date = this.getSelectedDate() ?? moment().startOf("iDate");
@@ -61,15 +56,12 @@ export default function hijriDateTimePickerFormComponent({
                 const newMonth = parseInt(new_val);
                 const oldMonth = this.focusedDate.iMonth();
 
-                console.log('the new month:', newMonth, 'the old month:', oldMonth);
 
                 if (oldMonth === newMonth) return;
 
                 // clone before mutating to avoid side effects
                 this.focusedDate = this.focusedDate.clone().iMonth(newMonth);
 
-                console.log('the new focused date (Hijri):', this.focusedDate.format('iYYYY/iM/iD'));
-                console.log('the new focused date (Gregorian):', this.focusedDate.format('YYYY-MM-DD'));
 
                 this.setupDaysGrid();
             });
@@ -78,7 +70,6 @@ export default function hijriDateTimePickerFormComponent({
 
             this.$watch("focusedYear", (new_val, _) => {
                 var new_year = parseInt(new_val);
-                console.log('the new year: ', new_year , 'the old year: ', this.focusedYear);
                 if (new_year > max_allowed_year) {
                     this.focusedYear = max_allowed_year;
                     return;
@@ -107,7 +98,6 @@ export default function hijriDateTimePickerFormComponent({
                 }
 
                 this.focusedDate = this.focusedDate.iYear(new_year); // Set year in Hijri
-                // console.log('this.focusedDate: ', this.focusedDate);
                 this.setupDaysGrid();
             });
 
@@ -191,17 +181,23 @@ export default function hijriDateTimePickerFormComponent({
                 const list = JSON.parse(disabledDates);
                 for (let disabledDate of list) {
                     if (!disabledDate) continue;
-                    const parsed = moment(disabledDate, 'iYYYY-iM-iD'); // consistent format
+                    const parsed = moment(disabledDate, this.displayFormat); // consistent format
                     if (parsed.isValid() && parsed.isSame(date, 'iDay')) {
                         return true;
                     }
                 }
             }
 
-            const max = this.getMaxDate();
-            if (max && date.isAfter(max, 'iDay')) return true;
+            const maxGregorian = this.getMaxDate();
+            // console.log('the maxGerogian: ', maxGregorian);
+            const max = maxGregorian ? moment(maxGregorian).toHijri() : null;
 
-            const min = this.getMinDate();
+            const minGregorian = this.getMinDate();
+            const min = minGregorian ? moment(minGregorian).toHijri() : null;
+
+            // console.log('Max Hijri:', max ? max.format(this.displayFormat) : null);
+
+            if (max && date.isAfter(max, 'iDay')) return true;
             if (min && date.isBefore(min, 'iDay')) return true;
 
             return false;
@@ -266,7 +262,7 @@ export default function hijriDateTimePickerFormComponent({
 
         getSelectedDate: function () {
             if (!this.state) return null;
-            const date = moment(this.state, 'iYYYY/iM/iD','ar-sa');
+            const date = moment(this.state, this.displayFormat,'ar-sa');
             return date.isValid() ? date : null;
         },
 
@@ -288,9 +284,8 @@ export default function hijriDateTimePickerFormComponent({
         },
 
         setDisplayText: function () {
-            console.log('the display text: ', this.getSelectedDate());
             const date = this.getSelectedDate();
-            this.displayText = date ? date.format('iYYYY/iM/iD') : '';
+            this.displayText = date ? date.format(this.displayFormat) : '';
 
         },
 
@@ -311,7 +306,6 @@ export default function hijriDateTimePickerFormComponent({
 
             // Correct way to get the number of days in the Hijri month
             let daysInMonth = date.iMonth(date.iMonth()).endOf('iMonth').iDate();
-            // console.log('iDaysInMonth: ', daysInMonth);
 
             this.emptyDaysInFocusedMonth = Array.from(
                 { length: startDayOfWeek },
@@ -331,10 +325,11 @@ export default function hijriDateTimePickerFormComponent({
 
         setState: function (date) {
             if (!date || this.dateIsDisabled(date)) return;
-            // this.state = date.format("YYYY-MM-DD HH:mm:ss");
-            // console.log('the date: ', date);
-            this.state = date.format('iYYYY/iM/iD');
-            console.log('the state: ', this.state);
+            this.state = date
+                .hour(this.hour ?? 0)
+                .minute(this.minute ?? 0)
+                .second(this.second ?? 0)
+                .format(this.displayFormat)
             this.setDisplayText();
         },
 

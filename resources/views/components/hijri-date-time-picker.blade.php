@@ -14,6 +14,17 @@
     $suffixIcon = $getSuffixIcon();
     $suffixLabel = $getSuffixLabel();
     $statePath = $getStatePath();
+
+//    $displayFormat = $getDisplayFormat() ?? 'Y-m-d H:i:s';
+//    $momentFormat = convert_date_format($displayFormat)->to('moment.js') ?? 'YYYY-MM-DD HH:mm:ss';
+
+    // Replace only the Gregorian date tokens with their Hijri equivalents
+//    $momentHijriFormat = str_replace(
+//        ['YYYY', 'MM', 'DD'],  // safe full tokens
+//        ['iYYYY', 'iMM', 'iDD'],
+//        $momentFormat
+//    );
+
 @endphp
 
 <x-dynamic-component
@@ -45,12 +56,13 @@
             @endif
             ax-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-hijri-picker', 'mohamedsabil83/filament-hijri-picker') }}"
             x-data="hijriDateTimePickerFormComponent({
-                displayFormat: '{{ convert_date_format($getDisplayFormat())->to('day.js') }}',
+{{--                displayFormat: '{{ $momentFormat }}',--}}
                 firstDayOfWeek: {{ $getFirstDayOfWeek() }},
                 isAutofocused: @js($isAutofocused()),
                 locale: @js(app()->getLocale()),
                 shouldCloseOnDateSelection: @js($shouldCloseOnDateSelection()),
                 state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$statePath}')") }},
+                hasTime: '{{ $hasTime()}}',
             })"
             x-on:keydown.esc="isOpen() && $event.stopPropagation()"
             {{
@@ -181,7 +193,7 @@
                                 <div
                                     x-text="day"
                                     x-on:click=" dayIsDisabled(day) || selectDate(day)"
-                                    x-on:mouseenter="setFocusedDay(day)"    
+                                    x-on:mouseenter="setFocusedDay(day)"
                                     role="option"
                                     x-bind:aria-selected="focusedDate.date() === day"
                                     x-bind:class="{
