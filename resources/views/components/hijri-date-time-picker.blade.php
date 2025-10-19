@@ -79,9 +79,9 @@
             />
 
             <input
-                x-ref="minDate"
+                x-ref="hMinDate"
                 type="hidden"
-                value="{{ $getMinDate() }}"
+                value="{{ $getHMinDate() }}"
             />
 
             <input

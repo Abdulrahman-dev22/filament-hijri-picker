@@ -17,7 +17,7 @@ export default function hijriDateTimePickerFormComponent({
 
     return {
         daysInFocusedMonth: [],
-        displayFormat: hasTime? 'iYYYY/iM/iD HH:mm:ss': 'iYYYY/iM/iD',
+        displayFormat: hasTime? 'iYYYY-iM-iD HH:mm:ss': 'iYYYY-iM-iD',
         displayText: '',
         emptyDaysInFocusedMonth: [],
         focusedDate: null,
@@ -198,10 +198,10 @@ export default function hijriDateTimePickerFormComponent({
 
             const maxHijri = max ? max.iYear(max.iYear()).iMonth(max.iMonth()).iDate(max.iDate()) : null;
             const minHijri = min ? min.iYear(min.iYear()).iMonth(min.iMonth()).iDate(min.iDate()) : null;
-            console.log('Max Gregorian:', max ? max.format('YYYY-MM-DD') : null);
-            console.log('Min Gregorian:', min ? min.format('YYYY-MM-DD') : null);
-            console.log('Max Hijri:', max ? max.format('iYYYY/iM/iD') : null);
-            console.log('Min Hijri:', min ? min.format('iYYYY/iM/iD') : null);
+            // console.log('Max Gregorian:', max ? max.format('YYYY-MM-DD') : null);
+            // console.log('Min Gregorian:', min ? min.format('YYYY-MM-DD') : null);
+            // console.log('Max Hijri:', max ? max.format('iYYYY/iM/iD') : null);
+            // console.log('Min Hijri:', min ? min.format('iYYYY/iM/iD') : null);
 
             if (max && date.isAfter(maxHijri, 'day')) return true;   // use 'day' for Gregorian comparison
             if (min && date.isBefore(minHijri, 'day')) return true;
@@ -260,7 +260,7 @@ export default function hijriDateTimePickerFormComponent({
             if (!this.$refs.maxDate?.value) return null;
 
             // Parse as Gregorian moment (default)
-            let date = moment(this.$refs.minDate.value);
+            let date = moment(this.$refs.hMinDate.value);
 
             return date.isValid() ? date : null;
         },
